@@ -4,119 +4,147 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sistema de Control - Evento de Cine</title>
-  <style>
-    :root {
-      --primary: #2563eb;
-      --primary-hover: #1d4ed8;
-      --secondary: #475569;
-      --secondary-hover: #334155;
-      --danger: #dc2626;
-      --danger-hover: #b91c1c;
-      --success: #16a34a;
-      --success-hover: #15803d;
-      --warning: #d97706;
-      --bg: #f1f5f9;
-      --card-bg: #ffffff;
-      --text: #0f172a;
-      --text-muted: #64748b;
-      --border: #cbd5e1;
-      --accent-bg: #eff6ff;
-    }
-    * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
-    body { background-color: var(--bg); color: var(--text); margin: 0; padding: 20px 10px; }
-    .container { max-width: 1000px; margin: 0 auto; }
-    
-    /* Contador Superior de Aforo */
-    .live-counter-bar {
-      background: linear-gradient(135deg, #1e293b, #0f172a);
-      color: white;
-      padding: 15px 20px;
-      border-radius: 12px;
-      margin-bottom: 20px;
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      flex-wrap: wrap;
-      gap: 15px;
-    }
-    .counter-item { text-align: center; }
-    .counter-item .num { font-size: 1.8rem; font-weight: 800; color: #38bdf8; display: block; }
-    .counter-item .label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; }
+<style>
+  :root {
+    --primary: #2563eb;
+    --primary-hover: #1d4ed8;
+    --secondary: #475569;
+    --secondary-hover: #334155;
+    --danger: #dc2626;
+    --danger-hover: #b91c1c;
+    --success: #16a34a;
+    --success-hover: #15803d;
+    --warning: #d97706;
+    --bg: #0f172a;
+    --card-bg: rgba(255, 255, 255, 0.92); /* Fondo semitransparente para legibilidad */
+    --text: #0f172a;
+    --text-muted: #64748b;
+    --border: #cbd5e1;
+    --accent-bg: #eff6ff;
+  }
+  
+  * { 
+    box-sizing: border-box; 
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
+  }
 
-    .screen { display: none; background: var(--card-bg); padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px -3px rgba(0,0,0,0.05); }
-    .screen.active { display: block; }
-    
-    h1, h2, h3 { margin-top: 0; color: var(--text); text-align: center; }
-    
-    .btn-group { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
-    button {
-      padding: 12px 20px;
-      font-size: 0.95rem;
-      font-weight: 600;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      background-color: var(--primary);
-      color: white;
-      transition: all 0.2s ease;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    }
-    button:hover { background-color: var(--primary-hover); transform: translateY(-1px); }
-    .btn-secondary { background-color: var(--secondary); }
-    .btn-secondary:hover { background-color: var(--secondary-hover); }
-    .btn-danger { background-color: var(--danger); padding: 6px 12px; font-size: 0.85rem; }
-    .btn-danger:hover { background-color: var(--danger-hover); }
-    .btn-ingreso { background-color: var(--success); padding: 6px 12px; font-size: 0.85rem; }
-    .btn-ingreso:hover { background-color: var(--success-hover); }
-    .btn-excel { background-color: #059669; }
-    .btn-excel:hover { background-color: #047857; }
-    .btn-back { margin-bottom: 20px; background-color: #64748b; }
+  /* Configuración del fondo fijo para toda la página */
+  body { 
+    margin: 0; 
+    padding: 20px 10px; 
+    min-height: 100vh;
+    background-image: url('fondo.jpg'); /* Reemplaza por la ruta de tu imagen */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed; /* Mantiene la imagen fija al hacer scroll */
+    color: var(--text);
+  }
 
-    .filter-btn-group { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 15px; }
-    .filter-btn { padding: 8px 14px; font-size: 0.85rem; background-color: #e2e8f0; color: #334155; border-radius: 6px; }
-    .filter-btn.active { background-color: var(--primary); color: white; }
+  .container { max-width: 1000px; margin: 0 auto; }
+  
+  /* Barra superior con contraste para fondo oscuro */
+  .live-counter-bar {
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(8px);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    flex-wrap: wrap;
+    gap: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
 
-    .form-group { margin-bottom: 15px; display: flex; flex-direction: column; gap: 6px; }
-    label { font-weight: 600; font-size: 0.9rem; color: #334155; }
-    input, select { padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.95rem; background-color: #f8fafc; }
-    input:focus, select:focus { outline: 2px solid var(--primary); background-color: white; }
-    
-    .asistentes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; margin-top: 10px; }
-    
-    table { width: 100%; border-collapse: collapse; margin-top: 15px; border-radius: 8px; overflow: hidden; }
-    th, td { padding: 12px 10px; text-align: left; border-bottom: 1px solid var(--border); font-size: 0.88rem; }
-    th { background-color: var(--accent-bg); color: #1e3a8a; font-weight: 700; }
-    
-    tr.row-pendiente { background-color: #ffffff; }
-    tr.row-ingresado { background-color: #f0fdf4; }
-    
-    .stats-card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 25px; }
-    .stat-card { background: #f8fafc; border: 1px solid var(--border); padding: 18px; border-radius: 10px; text-align: center; }
-    .stat-card h4 { margin: 0 0 5px 0; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; }
-    .stat-card .value { font-size: 1.6rem; font-weight: bold; color: var(--text); }
+  .counter-item { text-align: center; }
+  .counter-item .num { font-size: 1.8rem; font-weight: 800; color: #38bdf8; display: block; }
+  .counter-item .label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; }
 
-    /* Modal Pop-up */
-    .modal-backdrop {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(15, 23, 42, 0.6);
-      backdrop-filter: blur(2px);
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-    }
-    .modal-backdrop.active { display: flex; }
-    .modal {
-      background: white;
-      padding: 25px;
-      border-radius: 12px;
-      max-width: 420px;
-      width: 90%;
-      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2);
-    }
-  </style>
+  /* Pantallas ajustadas con desenfoque de cristal */
+  .screen { 
+    display: none; 
+    background: var(--card-bg); 
+    backdrop-filter: blur(6px);
+    padding: 25px; 
+    border-radius: 12px; 
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3); 
+  }
+  .screen.active { display: block; }
+  
+  h1, h2, h3 { margin-top: 0; color: var(--text); text-align: center; }
+  
+  .btn-group { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+  button {
+    padding: 12px 20px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    background-color: var(--primary);
+    color: white;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  button:hover { background-color: var(--primary-hover); transform: translateY(-1px); }
+  .btn-secondary { background-color: var(--secondary); }
+  .btn-secondary:hover { background-color: var(--secondary-hover); }
+  .btn-danger { background-color: var(--danger); padding: 6px 12px; font-size: 0.85rem; }
+  .btn-danger:hover { background-color: var(--danger-hover); }
+  .btn-ingreso { background-color: var(--success); padding: 6px 12px; font-size: 0.85rem; }
+  .btn-ingreso:hover { background-color: var(--success-hover); }
+  .btn-excel { background-color: #059669; }
+  .btn-excel:hover { background-color: #047857; }
+  .btn-back { margin-bottom: 20px; background-color: #64748b; }
+
+  .filter-btn-group { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 15px; }
+  .filter-btn { padding: 8px 14px; font-size: 0.85rem; background-color: #e2e8f0; color: #334155; border-radius: 6px; }
+  .filter-btn.active { background-color: var(--primary); color: white; }
+
+  .form-group { margin-bottom: 15px; display: flex; flex-direction: column; gap: 6px; }
+  label { font-weight: 600; font-size: 0.9rem; color: #334155; }
+  input, select { padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.95rem; background-color: #ffffff; }
+  input:focus, select:focus { outline: 2px solid var(--primary); background-color: white; }
+  
+  .asistentes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; margin-top: 10px; }
+  
+  table { width: 100%; border-collapse: collapse; margin-top: 15px; border-radius: 8px; overflow: hidden; }
+  th, td { padding: 12px 10px; text-align: left; border-bottom: 1px solid var(--border); font-size: 0.88rem; }
+  th { background-color: var(--accent-bg); color: #1e3a8a; font-weight: 700; }
+  
+  tr.row-pendiente { background-color: rgba(255, 255, 255, 0.8); }
+  tr.row-ingresado { background-color: rgba(240, 253, 244, 0.9); }
+  
+  .stats-card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 25px; }
+  .stat-card { background: rgba(248, 250, 252, 0.95); border: 1px solid var(--border); padding: 18px; border-radius: 10px; text-align: center; }
+  .stat-card h4 { margin: 0 0 5px 0; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; }
+  .stat-card .value { font-size: 1.6rem; font-weight: bold; color: var(--text); }
+
+  /* Modal Pop-up */
+  .modal-backdrop {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(4px);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  .modal-backdrop.active { display: flex; }
+  .modal {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    max-width: 420px;
+    width: 90%;
+    box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3);
+  }
+</style>
 </head>
 <body>
 
