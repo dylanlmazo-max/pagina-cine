@@ -145,6 +145,9 @@
     box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3);
   }
 </style>
+<!-- Librerías de Firebase -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
 <body>
 
@@ -368,9 +371,21 @@
 </div>
 
 <script>
+  const firebaseConfig = {
+  apiKey: "AIzaSyBtqEM2ydv0pGoG7_apXmEJQACrNZZsM9Y",
+  authDomain: "cinepromo26-eet21.firebaseapp.com",
+  projectId: "cinepromo26-eet21",
+  storageBucket: "cinepromo26-eet21.firebasestorage.app",
+  messagingSenderId: "753645066811",
+  appId: "1:753645066811:web:d8b719e3e5c68c869b9a1e",
+  measurementId: "G-RF14NTMW9W"
+};
+  // 2. Y justo abajo pegás ESTAS DOS LÍNEAS de acá para conectar:
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
   let ventas = [];
   let contadorId = 1;
-  let asistenteSeleccionado = null;
+  let asistenteSeleccionado = null;y 
   let filtroActual = 'todos';
 
   // Manejo seguro del LocalStorage
