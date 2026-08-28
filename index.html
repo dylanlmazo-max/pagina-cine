@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Control - Evento de Cine</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --danger: #dc2626;
+      --success: #16a34a;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #1e293b;
+      --border: #cbd5e1;
+    }
+    * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); margin: 0; padding: 20px; }
+    .container { max-width: 900px; margin: 0 auto; }
+    
+    .screen { display: none; background: var(--card-bg); padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+    .screen.active { display: block; }
+    
+    h1, h2 { margin-top: 0; text-align: center; }
+    
+    .btn-group { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
+    button {
+      padding: 12px 20px;
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      background-color: var(--primary);
+      color: white;
+      transition: background-color 0.2s;
+    }
+    button:hover { background-color: var(--primary-hover); }
+    .btn-secondary { background-color: #64748b; }
+    .btn-secondary:hover { background-color: #475569; }
+    .btn-danger { background-color: var(--danger); padding: 6px 12px; font-size: 0.85rem; }
+    .btn-ingreso { background-color: var(--success); padding: 6px 12px; font-size: 0.85rem; }
+    .btn-back { margin-bottom: 20px; background-color: #94a3b8; }
+
+    .form-group { margin-bottom: 15px; display: flex; flex-direction: column; gap: 5px; }
+    label { font-weight: 600; font-size: 0.9rem; }
+    input, select { padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 1rem; }
+    
+    .asistentes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; margin-top: 10px; }
+    
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    th, td { padding: 10px; text-align: left; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+    th { background-color: #f1f5f9; }
+    
+    .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
+    .badge-pend { background-color: #fef3c7; color: #b45309; }
+    .badge-ing { background-color: #dcfce7; color: #15803d; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- MENU PRINCIPAL -->
+  <div id="screen-main" class="screen active">
+    <h1>Gestión de Entradas - Cine</h1>
+    <div class="btn-group">
+      <button onclick="nav('screen-ventas-menu')">Cargar Venta de Entradas</button>
+      <button onclick="nav('screen-control-ingreso')">Control de Ingreso de Entradas</button>
+    </div>
+  </div>
+
+  <!-- MENU VENTAS -->
+  <div id="screen-ventas-menu" class="screen">
+    <button class="btn-back" onclick="nav('screen-main')">← Volver al Menú Principal</button>
+    <h2>Venta de Entradas</h2>
+    <div class="btn-group">
+      <button onclick="nav('screen-visualizar')">Visualizar Entradas</button>
+      <button onclick="nav('screen-registrar')">Registrar Nueva Venta de Entradas</button>
+    </div>
+  </div>
+
+  <!-- REGISTRAR VENTA -->
+  <div id="screen-registrar" class="screen">
+    <button class="btn-back" onclick="nav('screen-ventas-menu')">← Volver</button>
+    <h2>Registrar Nueva Venta</h2>
+    
+    <form id="form-venta" onsubmit="guardarVenta(event)">
+      <div class="form-group">
+        <label for="promo">Seleccione la Promoción:</label>
+        <select id="promo" onchange="generarCamposAsistentes()" required>
+          <option value="" disabled selected>-- Seleccione una opción --</option>
+          <option value="1" data-cant="1" data-precio="2500">Opción 1: 1 entrada x $2.500</option>
+          <option value="2" data-cant="2" data-precio="4500">Opción 2: 2 entradas x $4.500</option>
+          <option value="3" data-cant="3" data-precio="6000">Opción 3: 3 entradas x $6.000</option>
+          <option value="4" data-cant="5" data-precio="8500">Opción 4: 5 entradas x $8.500</option>
+          <option value="6" data-cant="12" data-precio="18000">Opción 6: Promo Especial (12 entradas + pochoclos) x $18.000</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="comprador">Nombre del Comprador:</label>
+        <input type="text" id="comprador" required placeholder="Nombre completo">
+      </div>
+
+      <div id="contenedor-asistentes"></div>
+
+      <div class="form-group" style="margin-top: 15px;">
+        <label for="metodoPago">Método de Pago:</label>
+        <select id="metodoPago" required>
+          <option value="Efectivo">Efectivo</option>
+          <option value="Transferencia">Transferencia</option>
+        </select>
+      </div>
+
+      <button type="submit" style="width: 100%; margin-top: 15px;">Aceptar y Finalizar</button>
+    </form>
+  </div>
+
+  <!-- VISUALIZAR ENTRADAS -->
+  <div id="screen-visualizar" class="screen">
+    <button class="btn-back" onclick="nav('screen-ventas-menu')">← Volver</button>
+    <h2>Entradas Registradas</h2>
+    <div style="overflow-x:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>N° Entrada</th>
+            <th>Comprador</th>
+            <th>Promo</th>
+            <th>Monto</th>
+            <th>Método</th>
+            <th>Asistentes Nombrados</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody id="tabla-visualizar"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- CONTROL DE INGRESO -->
+  <div id="screen-control-ingreso" class="screen">
+    <button class="btn-back" onclick="nav('screen-main')">← Volver al Menú Principal</button>
+    <h2>Control de Ingreso</h2>
+    <div class="form-group">
+      <input type="text" id="buscar-ingreso" placeholder="Buscar por comprador o asistente..." oninput="renderIngresos()">
+    </div>
+    <div style="overflow-x:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>N° Entrada</th>
+            <th>Comprador</th>
+            <th>Asistentes</th>
+            <th>Estado</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody id="tabla-ingreso"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  let ventas = JSON.parse(localStorage.getItem('ventas_cine')) || [];
+  let contadorId = parseInt(localStorage.getItem('contador_cine')) || 1;
+
+  function nav(screenId) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(screenId).classList.add('active');
+    
+    if (screenId === 'screen-visualizar') renderVisualizar();
+    if (screenId === 'screen-control-ingreso') renderIngresos();
+  }
+
+  function generarCamposAsistentes() {
+    const select = document.getElementById('promo');
+    const option = select.options[select.selectedIndex];
+    const cant = parseInt(option.getAttribute('data-cant'));
+    const contenedor = document.getElementById('contenedor-asistentes');
+    
+    contenedor.innerHTML = '<label>Nombres de los asistentes para cada entrada:</label>';
+    const grid = document.createElement('div');
+    grid.className = 'asistentes-grid';
+
+    for (let i = 1; i <= cant; i++) {
+      grid.innerHTML += `
+        <input type="text" class="input-asistente" placeholder="Asistente ${i}" required>
+      `;
+    }
+    contenedor.appendChild(grid);
+  }
+
+  function guardarVenta(e) {
+    e.preventDefault();
+    const select = document.getElementById('promo');
+    const option = select.options[select.selectedIndex];
+    
+    const asistentesInputs = document.querySelectorAll('.input-asistente');
+    const listaAsistentes = Array.from(asistentesInputs).map(inp => inp.value.trim());
+
+    const nuevaVenta = {
+      id: contadorId++,
+      comprador: document.getElementById('comprador').value.trim(),
+      promoText: option.text.split(' x ')[0],
+      monto: parseInt(option.getAttribute('data-precio')),
+      metodoPago: document.getElementById('metodoPago').value,
+      asistentes: listaAsistentes,
+      ingresado: false
+    };
+
+    ventas.push(nuevaVenta);
+    localStorage.setItem('ventas_cine', JSON.stringify(ventas));
+    localStorage.setItem('contador_cine', contadorId);
+
+    document.getElementById('form-venta').reset();
+    document.getElementById('contenedor-asistentes').innerHTML = '';
+    
+    alert('Venta registrada con éxito.');
+    nav('screen-visualizar');
+  }
+
+  function renderVisualizar() {
+    const tbody = document.getElementById('tabla-visualizar');
+    tbody.innerHTML = '';
+
+    ventas.forEach((v) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>#${v.id}</td>
+        <td>${v.comprador}</td>
+        <td>${v.promoText}</td>
+        <td>$${v.monto}</td>
+        <td>${v.metodoPago}</td>
+        <td>${v.asistentes.join(', ')}</td>
+        <td><button class="btn-danger" onclick="quitarVenta(${v.id})">Quitar</button></td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function quitarVenta(id) {
+    if (confirm('¿Seguro que deseas eliminar esta entrada?')) {
+      ventas = ventas.filter(v => v.id !== id);
+      localStorage.setItem('ventas_cine', JSON.stringify(ventas));
+      renderVisualizar();
+    }
+  }
+
+  function renderIngresos() {
+    const tbody = document.getElementById('tabla-ingreso');
+    const busqueda = document.getElementById('buscar-ingreso').value.toLowerCase();
+    tbody.innerHTML = '';
+
+    const filtradas = ventas.filter(v => 
+      v.comprador.toLowerCase().includes(busqueda) || 
+      v.asistentes.some(a => a.toLowerCase().includes(busqueda))
+    );
+
+    filtradas.forEach(v => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>#${v.id}</td>
+        <td>${v.comprador}</td>
+        <td>${v.asistentes.join(', ')}</td>
+        <td>
+          <span class="badge ${v.ingresado ? 'badge-ing' : 'badge-pend'}">
+            ${v.ingresado ? 'Ingresó' : 'Pendiente'}
+          </span>
+        </td>
+        <td>
+          ${!v.ingresado 
+            ? `<button class="btn-ingreso" onclick="marcarIngreso(${v.id})">Marcar Ingreso</button>` 
+            : '✓'}
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function marcarIngreso(id) {
+    const venta = ventas.find(v => v.id === id);
+    if (venta) {
+      venta.ingresado = true;
+      localStorage.setItem('ventas_cine', JSON.stringify(ventas));
+      renderIngresos();
+    }
+  }
+</script>
+
+</body>
+</html>
