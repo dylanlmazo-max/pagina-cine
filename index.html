@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Control - Evento de Cine</title>
+<style>
+  :root {
+    --primary: #2563eb;
+    --primary-hover: #1d4ed8;
+    --secondary: #475569;
+    --secondary-hover: #334155;
+    --danger: #dc2626;
+    --danger-hover: #b91c1c;
+    --success: #16a34a;
+    --success-hover: #15803d;
+    --warning: #d97706;
+    --bg: #0f172a;
+    --card-bg: rgba(255, 255, 255, 0.92); /* Fondo semitransparente para legibilidad */
+    --text: #0f172a;
+    --text-muted: #64748b;
+    --border: #cbd5e1;
+    --accent-bg: #eff6ff;
+  }
+  
+  * { 
+    box-sizing: border-box; 
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
+  }
+
+  /* Configuración del fondo fijo para toda la página */
+  body { 
+    margin: 0; 
+    padding: 20px 10px; 
+    min-height: 100vh;
+    background-image: url('fondo.jpg'); /* Reemplaza por la ruta de tu imagen */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed; /* Mantiene la imagen fija al hacer scroll */
+    color: var(--text);
+  }
+
+  .container { max-width: 1000px; margin: 0 auto; }
+  
+  /* Barra superior con contraste para fondo oscuro */
+  .live-counter-bar {
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(8px);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    flex-wrap: wrap;
+    gap: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .counter-item { text-align: center; }
+  .counter-item .num { font-size: 1.8rem; font-weight: 800; color: #38bdf8; display: block; }
+  .counter-item .label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; }
+
+  /* Pantallas ajustadas con desenfoque de cristal */
+  .screen { 
+    display: none; 
+    background: var(--card-bg); 
+    backdrop-filter: blur(6px);
+    padding: 25px; 
+    border-radius: 12px; 
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3); 
+  }
+  .screen.active { display: block; }
+  
+  h1, h2, h3 { margin-top: 0; color: var(--text); text-align: center; }
+  
+  .btn-group { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+  button {
+    padding: 12px 20px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    background-color: var(--primary);
+    color: white;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  button:hover { background-color: var(--primary-hover); transform: translateY(-1px); }
+  .btn-secondary { background-color: var(--secondary); }
+  .btn-secondary:hover { background-color: var(--secondary-hover); }
+  .btn-danger { background-color: var(--danger); padding: 6px 12px; font-size: 0.85rem; }
+  .btn-danger:hover { background-color: var(--danger-hover); }
+  .btn-ingreso { background-color: var(--success); padding: 6px 12px; font-size: 0.85rem; }
+  .btn-ingreso:hover { background-color: var(--success-hover); }
+  .btn-excel { background-color: #059669; }
+  .btn-excel:hover { background-color: #047857; }
+  .btn-back { margin-bottom: 20px; background-color: #64748b; }
+
+  .filter-btn-group { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 15px; }
+  .filter-btn { padding: 8px 14px; font-size: 0.85rem; background-color: #e2e8f0; color: #334155; border-radius: 6px; }
+  .filter-btn.active { background-color: var(--primary); color: white; }
+
+  .form-group { margin-bottom: 15px; display: flex; flex-direction: column; gap: 6px; }
+  label { font-weight: 600; font-size: 0.9rem; color: #334155; }
+  input, select { padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.95rem; background-color: #ffffff; }
+  input:focus, select:focus { outline: 2px solid var(--primary); background-color: white; }
+  
+  .asistentes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; margin-top: 10px; }
+  
+  table { width: 100%; border-collapse: collapse; margin-top: 15px; border-radius: 8px; overflow: hidden; }
+  th, td { padding: 12px 10px; text-align: left; border-bottom: 1px solid var(--border); font-size: 0.88rem; }
+  th { background-color: var(--accent-bg); color: #1e3a8a; font-weight: 700; }
+  
+  tr.row-pendiente { background-color: rgba(255, 255, 255, 0.8); }
+  tr.row-ingresado { background-color: rgba(240, 253, 244, 0.9); }
+  
+  .stats-card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 25px; }
+  .stat-card { background: rgba(248, 250, 252, 0.95); border: 1px solid var(--border); padding: 18px; border-radius: 10px; text-align: center; }
+  .stat-card h4 { margin: 0 0 5px 0; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; }
+  .stat-card .value { font-size: 1.6rem; font-weight: bold; color: var(--text); }
+
+  /* Modal Pop-up */
+  .modal-backdrop {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(4px);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  .modal-backdrop.active { display: flex; }
+  .modal {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    max-width: 420px;
+    width: 90%;
+    box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3);
+  }
+</style>
+<!-- Librerías de Firebase -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- BARRA SUPERIOR DE AFORO EN TIEMPO REAL -->
+  <div class="live-counter-bar">
+    <div class="counter-item">
+      <span class="num" id="live-ingresados">0</span>
+      <span class="label">Ingresados</span>
+    </div>
+    <div class="counter-item">
+      <span class="num" id="live-pendientes" style="color: #f59e0b;">0</span>
+      <span class="label">Pendientes</span>
+    </div>
+    <div class="counter-item">
+      <span class="num" id="live-total" style="color: #a855f7;">0</span>
+      <span class="label">Total Personas</span>
+    </div>
+  </div>
+
+  <!-- MENU PRINCIPAL -->
+  <div id="screen-main" class="screen active">
+    <h1>Control de Evento - Cine</h1>
+    <div class="btn-group">
+      <button onclick="nav('screen-ventas-menu')">Cargar Venta de Entradas</button>
+      <button onclick="nav('screen-control-ingreso')">Control de Ingreso de Entradas</button>
+      <button onclick="nav('screen-asistentes-registrados')" class="btn-secondary">Asistentes Registrados</button>
+      <button onclick="nav('screen-resumen-totales')" style="background-color: #0284c7;">Ver Totales y Recaudación</button>
+      <button onclick="exportarExcel()" class="btn-excel">Exportar Datos a Excel (CSV)</button>
+    </div>
+  </div>
+
+  <!-- MENU VENTAS -->
+  <div id="screen-ventas-menu" class="screen">
+    <button class="btn-back" onclick="nav('screen-main')">← Volver al Menú Principal</button>
+    <h2>Gestión de Ventas</h2>
+    <div class="btn-group">
+      <button onclick="nav('screen-visualizar')">Visualizar Entradas</button>
+      <button onclick="nav('screen-registrar')">Registrar Nueva Venta de Entradas</button>
+    </div>
+  </div>
+
+  <!-- REGISTRAR VENTA -->
+  <div id="screen-registrar" class="screen">
+    <button class="btn-back" onclick="nav('screen-ventas-menu')">← Volver</button>
+    <h2>Registrar Nueva Venta</h2>
+    
+    <form id="form-venta" onsubmit="guardarVenta(event)">
+      <div class="form-group">
+        <label for="promo">Seleccione la Promoción:</label>
+        <select id="promo" onchange="generarCamposAsistentes()" required>
+          <option value="" disabled selected>-- Seleccione una opción --</option>
+          <option value="1" data-cant="1" data-precio="2500">Opción 1: 1 entrada x $2.500</option>
+          <option value="2" data-cant="2" data-precio="4500">Opción 2: 2 entradas x $4.500</option>
+          <option value="3" data-cant="3" data-precio="6000">Opción 3: 3 entradas x $6.000</option>
+          <option value="4" data-cant="5" data-precio="8500">Opción 4: 5 entradas x $8.500</option>
+          <option value="5" data-cant="12" data-precio="18000">Opción 5: Promo Especial (12 entradas + pochoclos) x $18.000</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="comprador">Nombre del Comprador:</label>
+        <input type="text" id="comprador" required placeholder="Nombre completo del comprador">
+      </div>
+
+      <div id="contenedor-asistentes"></div>
+
+      <div class="form-group" style="margin-top: 15px;">
+        <label for="metodoPago">Método de Pago:</label>
+        <select id="metodoPago" required>
+          <option value="Efectivo">Efectivo</option>
+          <option value="Transferencia">Transferencia</option>
+        </select>
+      </div>
+
+      <button type="submit" style="width: 100%; margin-top: 15px;">Aceptar y Finalizar Venta</button>
+    </form>
+  </div>
+
+  <!-- VISUALIZAR ENTRADAS -->
+  <div id="screen-visualizar" class="screen">
+    <button class="btn-back" onclick="nav('screen-ventas-menu')">← Volver</button>
+    <h2>Entradas Registradas</h2>
+    <div style="overflow-x:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>N° Entrada</th>
+            <th>Comprador</th>
+            <th>Promo</th>
+            <th>Monto</th>
+            <th>Método</th>
+            <th>Asistentes Nombrados</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody id="tabla-visualizar"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- CONTROL DE INGRESO -->
+  <div id="screen-control-ingreso" class="screen">
+    <button class="btn-back" onclick="nav('screen-main')">← Volver al Menú Principal</button>
+    <h2>Control de Ingreso</h2>
+    
+    <div class="form-group">
+      <input type="text" id="buscar-ingreso" placeholder="Buscar por nombre de persona o comprador..." oninput="renderIngresos()">
+    </div>
+
+    <!-- Filtros Rápidos -->
+    <div class="filter-btn-group">
+      <button class="filter-btn active" id="filter-todos" onclick="setFiltro('todos')">Todos</button>
+      <button class="filter-btn" id="filter-pendientes" onclick="setFiltro('pendientes')">Solo Pendientes</button>
+      <button class="filter-btn" id="filter-ingresados" onclick="setFiltro('ingresados')">Solo Ingresados</button>
+    </div>
+
+    <div style="overflow-x:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>N° Entrada</th>
+            <th>Asistente</th>
+            <th>Comprador</th>
+            <th>Estado / Acción</th>
+          </tr>
+        </thead>
+        <tbody id="tabla-ingreso"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ASISTENTES REGISTRADOS -->
+  <div id="screen-asistentes-registrados" class="screen">
+    <button class="btn-back" onclick="nav('screen-main')">← Volver al Menú Principal</button>
+    <h2>Asistentes Registrados</h2>
+    <div style="overflow-x:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>N° Entrada</th>
+            <th>Asistente</th>
+            <th>Comprador</th>
+            <th>Mochila</th>
+            <th>N° Mochila</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody id="tabla-asistentes-registrados"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- VER TOTALES Y RECAUDACIÓN -->
+  <div id="screen-resumen-totales" class="screen">
+    <button class="btn-back" onclick="nav('screen-main')">← Volver al Menú Principal</button>
+    <h2>Resumen Total y Recaudación</h2>
+
+    <div class="stats-card-grid">
+      <div class="stat-card">
+        <h4>Total Personas (Entradas)</h4>
+        <div class="value" id="stat-total-entradas">0</div>
+      </div>
+      <div class="stat-card">
+        <h4>Recaudación Total</h4>
+        <div class="value" id="stat-monto-total" style="color: #16a34a;">$0</div>
+      </div>
+      <div class="stat-card">
+        <h4>Recaudado Efectivo</h4>
+        <div class="value" id="stat-efectivo">$0</div>
+      </div>
+      <div class="stat-card">
+        <h4>Recaudado Transferencia</h4>
+        <div class="value" id="stat-transferencia" style="color: #2563eb;">$0</div>
+      </div>
+    </div>
+
+    <h3>Desglose por Opción de Combo Vendido</h3>
+    <div style="overflow-x:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>Promoción</th>
+            <th>Ventas Realizadas</th>
+            <th>Total Entradas</th>
+            <th>Recaudación</th>
+          </tr>
+        </thead>
+        <tbody id="tabla-desglose-combos"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- MODAL PREGUNTA MOCHILA -->
+<div id="modal-mochila" class="modal-backdrop">
+  <div class="modal">
+    <h3 style="margin-top:0;">Registro de Ingreso</h3>
+    <p id="modal-nombre-asistente" style="font-weight: bold; font-size: 1.1rem; color: #1e293b;"></p>
+    
+    <div class="form-group">
+      <label for="dejaMochila">¿Deja mochila?</label>
+      <select id="dejaMochila" onchange="toggleNumMochila()">
+        <option value="No">No</option>
+        <option value="Sí">Sí</option>
+      </select>
+    </div>
+
+    <div class="form-group" id="group-num-mochila" style="display: none;">
+      <label for="numMochila">Número de Mochila:</label>
+      <input type="text" id="numMochila" placeholder="Ej. 12">
+    </div>
+
+    <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+      <button class="btn-secondary" onclick="cerrarModal()">Cancelar</button>
+      <button onclick="confirmarIngreso()">Confirmar Ingreso</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // 1. Configuración de tu proyecto Firebase
+  const firebaseConfig = {
+    apiKey: "AIzaSyBtqEM2ydv0pGoG7_apXmEJQACrNZZsM9Y",
+    authDomain: "cinepromo26-eet21.firebaseapp.com",
+    databaseURL: "https://cinepromo26-eet21-default-rtdb.firebaseio.com", // Se agrega URL requerida para la base de datos
+    projectId: "cinepromo26-eet21",
+    storageBucket: "cinepromo26-eet21.firebasestorage.app",
+    messagingSenderId: "753645066811",
+    appId: "1:753645066811:web:d8b719e3e5c68c869b9a1e",
+    measurementId: "G-RF14NTMW9W"
+  };
+
+  // 2. Inicializar Firebase
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  let ventas = [];
+  let contadorId = 1;
+  let asistenteSeleccionado = null;
+  let filtroActual = 'todos';
+
+  // 3. Escuchar los datos desde Firebase en TIEMPO REAL
+  db.ref('ventas_cine').on('value', (snapshot) => {
+    const data = snapshot.val();
+    ventas = data ? data.ventas || [] : [];
+    contadorId = data ? data.contadorId || 1 : 1;
+    
+    actualizarContadorAforo();
+
+    // Refresca automáticamente la vista que el usuario tenga activa
+    const activeScreen = document.querySelector('.screen.active');
+    if (activeScreen) {
+      const screenId = activeScreen.id;
+      if (screenId === 'screen-visualizar') renderVisualizar();
+      if (screenId === 'screen-control-ingreso') renderIngresos();
+      if (screenId === 'screen-asistentes-registrados') renderAsistentesRegistrados();
+      if (screenId === 'screen-resumen-totales') renderResumenTotales();
+    }
+  });
+
+  // Función para guardar los cambios centralizados en Firebase
+  function sincronizarFirebase() {
+    db.ref('ventas_cine').set({
+      ventas: ventas,
+      contadorId: contadorId
+    });
+  }
+
+  function nav(screenId) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    const targetScreen = document.getElementById(screenId);
+    if (targetScreen) {
+      targetScreen.classList.add('active');
+    }
+    
+    actualizarContadorAforo();
+
+    if (screenId === 'screen-visualizar') renderVisualizar();
+    if (screenId === 'screen-control-ingreso') renderIngresos();
+    if (screenId === 'screen-asistentes-registrados') renderAsistentesRegistrados();
+    if (screenId === 'screen-resumen-totales') renderResumenTotales();
+  }
+
+  function actualizarContadorAforo() {
+    let ingresados = 0;
+    let total = 0;
+
+    ventas.forEach(v => {
+      if (v.asistentes && Array.isArray(v.asistentes)) {
+        v.asistentes.forEach(a => {
+          total++;
+          if (a.ingresado) ingresados++;
+        });
+      }
+    });
+
+    document.getElementById('live-ingresados').innerText = ingresados;
+    document.getElementById('live-pendientes').innerText = total - ingresados;
+    document.getElementById('live-total').innerText = total;
+  }
+
+  function setFiltro(tipo) {
+    filtroActual = tipo;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    const targetFilter = document.getElementById(`filter-${tipo}`);
+    if (targetFilter) targetFilter.classList.add('active');
+    renderIngresos();
+  }
+
+  function generarCamposAsistentes() {
+    const select = document.getElementById('promo');
+    if (select.selectedIndex === -1) return;
+    const option = select.options[select.selectedIndex];
+    const cant = parseInt(option.getAttribute('data-cant'), 10) || 0;
+    const contenedor = document.getElementById('contenedor-asistentes');
+    
+    contenedor.innerHTML = '<label>Nombres de los asistentes para cada entrada:</label>';
+    const grid = document.createElement('div');
+    grid.className = 'asistentes-grid';
+
+    for (let i = 1; i <= cant; i++) {
+      grid.innerHTML += `
+        <input type="text" class="input-asistente" placeholder="Asistente ${i}" required>
+      `;
+    }
+    contenedor.appendChild(grid);
+  }
+
+  function guardarVenta(e) {
+    e.preventDefault();
+    const select = document.getElementById('promo');
+    if (select.selectedIndex === -1) return;
+    const option = select.options[select.selectedIndex];
+    
+    const asistentesInputs = document.querySelectorAll('.input-asistente');
+    const listaAsistentes = Array.from(asistentesInputs).map(inp => ({
+      nombre: inp.value.trim(),
+      ingresado: false,
+      dejaMochila: 'No',
+      numMochila: '-'
+    }));
+
+    const nuevaVenta = {
+      id: contadorId++,
+      optionVal: select.value,
+      comprador: document.getElementById('comprador').value.trim(),
+      promoText: option.text.split(' x ')[0],
+      monto: parseInt(option.getAttribute('data-precio'), 10) || 0,
+      metodoPago: document.getElementById('metodoPago').value,
+      asistentes: listaAsistentes
+    };
+
+    ventas.push(nuevaVenta);
+    
+    // Guardar en la nube (Firebase)
+    sincronizarFirebase();
+
+    document.getElementById('form-venta').reset();
+    document.getElementById('contenedor-asistentes').innerHTML = '';
+    
+    alert('Venta registrada con éxito.');
+    nav('screen-visualizar');
+  }
+
+  function renderVisualizar() {
+    const tbody = document.getElementById('tabla-visualizar');
+    tbody.innerHTML = '';
+
+    ventas.forEach((v) => {
+      const tr = document.createElement('tr');
+      const nombresAsistentes = v.asistentes ? v.asistentes.map(a => a.nombre).join(', ') : '';
+      tr.innerHTML = `
+        <td>#${v.id}</td>
+        <td>${v.comprador}</td>
+        <td>${v.promoText}</td>
+        <td>$${v.monto}</td>
+        <td>${v.metodoPago}</td>
+        <td>${nombresAsistentes}</td>
+        <td><button class="btn-danger" onclick="quitarVenta(${v.id})">Quitar</button></td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function quitarVenta(id) {
+    if (confirm('¿Seguro que deseas eliminar esta entrada?')) {
+      ventas = ventas.filter(v => v.id !== id);
+      sincronizarFirebase();
+    }
+  }
+
+  function renderIngresos() {
+    const tbody = document.getElementById('tabla-ingreso');
+    const busqueda = document.getElementById('buscar-ingreso').value.toLowerCase();
+    tbody.innerHTML = '';
+
+    ventas.forEach(v => {
+      if (v.asistentes && Array.isArray(v.asistentes)) {
+        v.asistentes.forEach((asistente, index) => {
+          const coincideBusqueda = asistente.nombre.toLowerCase().includes(busqueda) || v.comprador.toLowerCase().includes(busqueda);
+          
+          let coincideFiltro = true;
+          if (filtroActual === 'pendientes') coincideFiltro = !asistente.ingresado;
+          if (filtroActual === 'ingresados') coincideFiltro = asistente.ingresado;
+
+          if (coincideBusqueda && coincideFiltro) {
+            const tr = document.createElement('tr');
+            tr.className = asistente.ingresado ? 'row-ingresado' : 'row-pendiente';
+
+            tr.innerHTML = `
+              <td>#${v.id}</td>
+              <td><strong>${asistente.nombre}</strong></td>
+              <td>${v.comprador}</td>
+              <td>
+                ${!asistente.ingresado 
+                  ? `<button class="btn-ingreso" onclick="abrirModalMochila(${v.id}, ${index})">Marcar Ingreso</button>` 
+                  : '<span style="color: var(--success); font-weight: bold;">✓ Registrado</span>'}
+              </td>
+            `;
+            tbody.appendChild(tr);
+          }
+        });
+      }
+    });
+  }
+
+  function abrirModalMochila(ventaId, asistenteIndex) {
+    const venta = ventas.find(v => v.id === ventaId);
+    if (!venta || !venta.asistentes[asistenteIndex]) return;
+
+    asistenteSeleccionado = { ventaId, asistenteIndex };
+    const asistente = venta.asistentes[asistenteIndex];
+
+    document.getElementById('modal-nombre-asistente').innerText = `Asistente: ${asistente.nombre}`;
+    document.getElementById('dejaMochila').value = 'No';
+    document.getElementById('numMochila').value = '';
+    toggleNumMochila();
+
+    document.getElementById('modal-mochila').classList.add('active');
+  }
+
+  function toggleNumMochila() {
+    const deja = document.getElementById('dejaMochila').value;
+    document.getElementById('group-num-mochila').style.display = (deja === 'Sí') ? 'flex' : 'none';
+  }
+
+  function cerrarModal() {
+    document.getElementById('modal-mochila').classList.remove('active');
+    asistenteSeleccionado = null;
+  }
+
+  function confirmarIngreso() {
+    if (!asistenteSeleccionado) return;
+
+    const { ventaId, asistenteIndex } = asistenteSeleccionado;
+    const venta = ventas.find(v => v.id === ventaId);
+    
+    if (venta && venta.asistentes[asistenteIndex]) {
+      const dejaMochila = document.getElementById('dejaMochila').value;
+      const numMochila = document.getElementById('numMochila').value.trim();
+
+      if (dejaMochila === 'Sí' && !numMochila) {
+        alert('Por favor, ingresa el número de mochila.');
+        return;
+      }
+
+      const asistente = venta.asistentes[asistenteIndex];
+      asistente.ingresado = true;
+      asistente.dejaMochila = dejaMochila;
+      asistente.numMochila = dejaMochila === 'Sí' ? numMochila : '-';
+
+      sincronizarFirebase();
+      cerrarModal();
+    }
+  }
+
+  function deshacerIngreso(ventaId, asistenteIndex) {
+    if (confirm('¿Deseas cancelar el ingreso registrado de este asistente?')) {
+      const venta = ventas.find(v => v.id === ventaId);
+      if (venta && venta.asistentes[asistenteIndex]) {
+        venta.asistentes[asistenteIndex].ingresado = false;
+        venta.asistentes[asistenteIndex].dejaMochila = 'No';
+        venta.asistentes[asistenteIndex].numMochila = '-';
+
+        sincronizarFirebase();
+      }
+    }
+  }
+
+  function renderAsistentesRegistrados() {
+    const tbody = document.getElementById('tabla-asistentes-registrados');
+    tbody.innerHTML = '';
+
+    ventas.forEach(v => {
+      if (v.asistentes && Array.isArray(v.asistentes)) {
+        v.asistentes.forEach((asistente, index) => {
+          if (asistente.ingresado) {
+            const tr = document.createElement('tr');
+            tr.className = 'row-ingresado';
+            tr.innerHTML = `
+              <td>#${v.id}</td>
+              <td><strong>${asistente.nombre}</strong></td>
+              <td>${v.comprador}</td>
+              <td>${asistente.dejaMochila}</td>
+              <td>${asistente.numMochila}</td>
+              <td><button class="btn-danger" onclick="deshacerIngreso(${v.id}, ${index})">Deshacer Ingreso</button></td>
+            `;
+            tbody.appendChild(tr);
+          }
+        });
+      }
+    });
+  }
+
+  function renderResumenTotales() {
+    let totalEntradas = 0;
+    let montoTotal = 0;
+    let efectivo = 0;
+    let transferencia = 0;
+
+    const desglose = {
+      '1': { promo: 'Opción 1 (1 entrada)', ventas: 0, personas: 0, recaudado: 0 },
+      '2': { promo: 'Opción 2 (2 entradas)', ventas: 0, personas: 0, recaudado: 0 },
+      '3': { promo: 'Opción 3 (3 entradas)', ventas: 0, personas: 0, recaudado: 0 },
+      '4': { promo: 'Opción 4 (5 entradas)', ventas: 0, personas: 0, recaudado: 0 },
+      '5': { promo: 'Opción 5 (Promo Especial)', ventas: 0, personas: 0, recaudado: 0 }
+    };
+
+    ventas.forEach(v => {
+      const cantPersonas = v.asistentes ? v.asistentes.length : 0;
+      totalEntradas += cantPersonas;
+      montoTotal += v.monto;
+
+      if (v.metodoPago === 'Efectivo') efectivo += v.monto;
+      if (v.metodoPago === 'Transferencia') transferencia += v.monto;
+
+      if (desglose[v.optionVal]) {
+        desglose[v.optionVal].ventas++;
+        desglose[v.optionVal].personas += cantPersonas;
+        desglose[v.optionVal].recaudado += v.monto;
+      }
+    });
+
+    document.getElementById('stat-total-entradas').innerText = totalEntradas;
+    document.getElementById('stat-monto-total').innerText = `$${montoTotal}`;
+    document.getElementById('stat-efectivo').innerText = `$${efectivo}`;
+    document.getElementById('stat-transferencia').innerText = `$${transferencia}`;
+
+    const tbody = document.getElementById('tabla-desglose-combos');
+    tbody.innerHTML = '';
+
+    Object.values(desglose).forEach(d => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><strong>${d.promo}</strong></td>
+        <td>${d.ventas}</td>
+        <td>${d.personas}</td>
+        <td>$${d.recaudado}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function exportarExcel() {
+    if (ventas.length === 0) {
+      alert('No hay datos registrados para exportar.');
+      return;
+    }
+
+    let csvRows = [];
+    csvRows.push(["ID Entrada", "Comprador", "Asistente", "Estado", "Mochila", "Num Mochila", "Promo", "Monto", "Metodo Pago"]);
+
+    ventas.forEach(v => {
+      if (v.asistentes && Array.isArray(v.asistentes)) {
+        v.asistentes.forEach(a => {
+          const estado = a.ingresado ? "Ingresó" : "Pendiente";
+          csvRows.push([
+            v.id,
+            `"${v.comprador}"`,
+            `"${a.nombre}"`,
+            `"${estado}"`,
+            `"${a.dejaMochila}"`,
+            `"${a.numMochila}"`,
+            `"${v.promoText}"`,
+            v.monto,
+            `"${v.metodoPago}"`
+          ]);
+        });
+      }
+    });
+
+    const csvString = "\uFEFF" + csvRows.map(row => row.join(",")).join("\n");
+    const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `reporte_entradas_cine_${new Date().toISOString().slice(0,10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+</script>
+
+</body>
+</html>
