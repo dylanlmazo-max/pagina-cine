@@ -4,156 +4,158 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sistema de Control - Evento de Cine</title>
-<style>
-  :root {
-    --primary: #2563eb;
-    --primary-hover: #1d4ed8;
-    --secondary: #475569;
-    --secondary-hover: #334155;
-    --danger: #dc2626;
-    --danger-hover: #b91c1c;
-    --success: #16a34a;
-    --success-hover: #15803d;
-    --warning: #d97706;
-    --bg: #0f172a;
-    --card-bg: rgba(255, 255, 255, 0.92); /* Fondo semitransparente para legibilidad */
-    --text: #0f172a;
-    --text-muted: #64748b;
-    --border: #cbd5e1;
-    --accent-bg: #eff6ff;
-  }
-  
-  * { 
-    box-sizing: border-box; 
-    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
-  }
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --secondary: #475569;
+      --secondary-hover: #334155;
+      --danger: #dc2626;
+      --danger-hover: #b91c1c;
+      --success: #16a34a;
+      --success-hover: #15803d;
+      --warning: #d97706;
+      --bg: #0f172a;
+      --card-bg: rgba(255, 255, 255, 0.94);
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --border: #cbd5e1;
+      --accent-bg: #eff6ff;
+    }
+    
+    * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
 
-  /* Configuración del fondo fijo para toda la página */
-  body { 
-    margin: 0; 
-    padding: 20px 10px; 
-    min-height: 100vh;
-    background-image: url('fondo.jpg'); /* Reemplaza por la ruta de tu imagen */
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-attachment: fixed; /* Mantiene la imagen fija al hacer scroll */
-    color: var(--text);
-  }
+    body { 
+      margin: 0; 
+      padding: 20px 10px; 
+      min-height: 100vh;
+      background-image: url('fondo.jpg');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      color: var(--text);
+    }
 
-  .container { max-width: 1000px; margin: 0 auto; }
-  
-  /* Barra superior con contraste para fondo oscuro */
-  .live-counter-bar {
-    background: rgba(15, 23, 42, 0.85);
-    backdrop-filter: blur(8px);
-    color: white;
-    padding: 15px 20px;
-    border-radius: 12px;
-    margin-bottom: 20px;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-    flex-wrap: wrap;
-    gap: 15px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-  }
+    .container { max-width: 1000px; margin: 0 auto; }
+    
+    .live-counter-bar {
+      background: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(8px);
+      color: white;
+      padding: 15px 20px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+      flex-wrap: wrap;
+      gap: 15px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
 
-  .counter-item { text-align: center; }
-  .counter-item .num { font-size: 1.8rem; font-weight: 800; color: #38bdf8; display: block; }
-  .counter-item .label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; }
+    .counter-item { text-align: center; }
+    .counter-item .num { font-size: 1.8rem; font-weight: 800; color: #38bdf8; display: block; }
+    .counter-item .label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; }
 
-  /* Pantallas ajustadas con desenfoque de cristal */
-  .screen { 
-    display: none; 
-    background: var(--card-bg); 
-    backdrop-filter: blur(6px);
-    padding: 25px; 
-    border-radius: 12px; 
-    box-shadow: 0 10px 25px rgba(0,0,0,0.3); 
-  }
-  .screen.active { display: block; }
-  
-  h1, h2, h3 { margin-top: 0; color: var(--text); text-align: center; }
-  
-  .btn-group { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
-  button {
-    padding: 12px 20px;
-    font-size: 0.95rem;
-    font-weight: 600;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    background-color: var(--primary);
-    color: white;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  }
-  button:hover { background-color: var(--primary-hover); transform: translateY(-1px); }
-  .btn-secondary { background-color: var(--secondary); }
-  .btn-secondary:hover { background-color: var(--secondary-hover); }
-  .btn-danger { background-color: var(--danger); padding: 6px 12px; font-size: 0.85rem; }
-  .btn-danger:hover { background-color: var(--danger-hover); }
-  .btn-ingreso { background-color: var(--success); padding: 6px 12px; font-size: 0.85rem; }
-  .btn-ingreso:hover { background-color: var(--success-hover); }
-  .btn-excel { background-color: #059669; }
-  .btn-excel:hover { background-color: #047857; }
-  .btn-back { margin-bottom: 20px; background-color: #64748b; }
+    .screen { 
+      display: none; 
+      background: var(--card-bg); 
+      backdrop-filter: blur(6px);
+      padding: 25px; 
+      border-radius: 12px; 
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3); 
+    }
+    .screen.active { display: block; }
+    
+    h1, h2, h3 { margin-top: 0; color: var(--text); text-align: center; }
+    
+    .btn-group { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+    button {
+      padding: 12px 20px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      background-color: var(--primary);
+      color: white;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    button:hover { background-color: var(--primary-hover); transform: translateY(-1px); }
+    .btn-secondary { background-color: var(--secondary); }
+    .btn-secondary:hover { background-color: var(--secondary-hover); }
+    .btn-danger { background-color: var(--danger); padding: 6px 12px; font-size: 0.85rem; }
+    .btn-danger:hover { background-color: var(--danger-hover); }
+    .btn-ingreso { background-color: var(--success); padding: 6px 12px; font-size: 0.85rem; }
+    .btn-ingreso:hover { background-color: var(--success-hover); }
+    .btn-excel { background-color: #059669; }
+    .btn-excel:hover { background-color: #047857; }
+    .btn-back { margin-bottom: 20px; background-color: #64748b; }
 
-  .filter-btn-group { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 15px; }
-  .filter-btn { padding: 8px 14px; font-size: 0.85rem; background-color: #e2e8f0; color: #334155; border-radius: 6px; }
-  .filter-btn.active { background-color: var(--primary); color: white; }
+    .filter-btn-group { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 15px; }
+    .filter-btn { padding: 8px 14px; font-size: 0.85rem; background-color: #e2e8f0; color: #334155; border-radius: 6px; }
+    .filter-btn.active { background-color: var(--primary); color: white; }
 
-  .form-group { margin-bottom: 15px; display: flex; flex-direction: column; gap: 6px; }
-  label { font-weight: 600; font-size: 0.9rem; color: #334155; }
-  input, select { padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.95rem; background-color: #ffffff; }
-  input:focus, select:focus { outline: 2px solid var(--primary); background-color: white; }
-  
-  .asistentes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; margin-top: 10px; }
-  
-  table { width: 100%; border-collapse: collapse; margin-top: 15px; border-radius: 8px; overflow: hidden; }
-  th, td { padding: 12px 10px; text-align: left; border-bottom: 1px solid var(--border); font-size: 0.88rem; }
-  th { background-color: var(--accent-bg); color: #1e3a8a; font-weight: 700; }
-  
-  tr.row-pendiente { background-color: rgba(255, 255, 255, 0.8); }
-  tr.row-ingresado { background-color: rgba(240, 253, 244, 0.9); }
-  
-  .stats-card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 25px; }
-  .stat-card { background: rgba(248, 250, 252, 0.95); border: 1px solid var(--border); padding: 18px; border-radius: 10px; text-align: center; }
-  .stat-card h4 { margin: 0 0 5px 0; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; }
-  .stat-card .value { font-size: 1.6rem; font-weight: bold; color: var(--text); }
+    .form-group { margin-bottom: 15px; display: flex; flex-direction: column; gap: 6px; }
+    label { font-weight: 600; font-size: 0.9rem; color: #334155; }
+    input, select { padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.95rem; background-color: #ffffff; }
+    input:focus, select:focus { outline: 2px solid var(--primary); background-color: white; }
+    
+    .asistentes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; margin-top: 10px; }
+    .asistente-input-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
 
-  /* Modal Pop-up */
-  .modal-backdrop {
-    display: none;
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(15, 23, 42, 0.75);
-    backdrop-filter: blur(4px);
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-  }
-  .modal-backdrop.active { display: flex; }
-  .modal {
-    background: white;
-    padding: 25px;
-    border-radius: 12px;
-    max-width: 420px;
-    width: 90%;
-    box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3);
-  }
-</style>
-<!-- Librerías de Firebase -->
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; border-radius: 8px; overflow: hidden; }
+    th, td { padding: 12px 10px; text-align: left; border-bottom: 1px solid var(--border); font-size: 0.88rem; }
+    th { background-color: var(--accent-bg); color: #1e3a8a; font-weight: 700; }
+    
+    tr.row-pendiente { background-color: rgba(255, 255, 255, 0.8); }
+    tr.row-ingresado { background-color: rgba(240, 253, 244, 0.9); }
+    
+    .stats-card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 25px; }
+    .stat-card { background: rgba(248, 250, 252, 0.95); border: 1px solid var(--border); padding: 18px; border-radius: 10px; text-align: center; }
+    .stat-card h4 { margin: 0 0 5px 0; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; }
+    .stat-card .value { font-size: 1.6rem; font-weight: bold; color: var(--text); }
+
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(4px);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .modal-backdrop.active { display: flex; }
+    .modal {
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      max-width: 450px;
+      width: 90%;
+      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3);
+    }
+    .danger-box {
+      margin-top: 25px;
+      padding: 15px;
+      background-color: #fef2f2;
+      border: 1px solid #fca5a5;
+      border-radius: 8px;
+    }
+  </style>
+
+  <!-- Firebase JavaScript SDK v8 -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
 <body>
 
 <div class="container">
 
-  <!-- BARRA SUPERIOR DE AFORO EN TIEMPO REAL -->
+  <!-- BARRA SUPERIOR DE AFORO -->
   <div class="live-counter-bar">
     <div class="counter-item">
       <span class="num" id="live-ingresados">0</span>
@@ -177,6 +179,7 @@
       <button onclick="nav('screen-control-ingreso')">Control de Ingreso de Entradas</button>
       <button onclick="nav('screen-asistentes-registrados')" class="btn-secondary">Asistentes Registrados</button>
       <button onclick="nav('screen-resumen-totales')" style="background-color: #0284c7;">Ver Totales y Recaudación</button>
+      <button onclick="nav('screen-curso6to')" style="background-color: #7c3aed;">Agregar / Gestionar Curso de 6to</button>
       <button onclick="exportarExcel()" class="btn-excel">Exportar Datos a Excel (CSV)</button>
     </div>
   </div>
@@ -259,7 +262,6 @@
       <input type="text" id="buscar-ingreso" placeholder="Buscar por nombre de persona o comprador..." oninput="renderIngresos()">
     </div>
 
-    <!-- Filtros Rápidos -->
     <div class="filter-btn-group">
       <button class="filter-btn active" id="filter-todos" onclick="setFiltro('todos')">Todos</button>
       <button class="filter-btn" id="filter-pendientes" onclick="setFiltro('pendientes')">Solo Pendientes</button>
@@ -272,7 +274,7 @@
           <tr>
             <th>N° Entrada</th>
             <th>Asistente</th>
-            <th>Comprador</th>
+            <th>Comprador / Curso</th>
             <th>Estado / Acción</th>
           </tr>
         </thead>
@@ -291,7 +293,7 @@
           <tr>
             <th>N° Entrada</th>
             <th>Asistente</th>
-            <th>Comprador</th>
+            <th>Comprador / Curso</th>
             <th>Mochila</th>
             <th>N° Mochila</th>
             <th>Acción</th>
@@ -342,9 +344,42 @@
     </div>
   </div>
 
+  <!-- AGREGAR CURSO DE 6TO -->
+  <div id="screen-curso6to" class="screen">
+    <button class="btn-back" onclick="nav('screen-main')">← Volver al Menú Principal</button>
+    <h2>Cargar Curso de 6to / Especial</h2>
+    
+    <form id="form-curso6to" onsubmit="guardarCurso6to(event)">
+      <div class="form-group">
+        <label for="curso-division">Nombre del Curso / División / Delegación:</label>
+        <input type="text" id="curso-division" required placeholder="Ej: 6to 1ra CC / 6to 2da MMO">
+      </div>
+
+      <div class="form-group">
+        <label>Lista de Asistentes (Sin límite de alumnos):</label>
+        <div id="contenedor-asistentes-6to">
+          <div class="asistente-input-row">
+            <input type="text" class="input-6to-alumno" placeholder="Nombre completo del alumno" required style="width: 100%;">
+          </div>
+        </div>
+        <button type="button" onclick="agregarCampoAlumno6to()" class="btn-secondary" style="margin-top: 10px;">+ Agregar otro alumno</button>
+      </div>
+
+      <button type="submit" style="width: 100%; margin-top: 20px; background-color: #7c3aed;">Guardar Lista de Curso</button>
+    </form>
+
+    <div class="danger-box">
+      <h3 style="color: #dc2626; text-align: left;">Zona de Seguridad - Reseteo de Función</h3>
+      <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 15px;">
+        Esta opción limpia y resetea los asistentes de la función. Requiere confirmación de clave de seguridad.
+      </p>
+      <button class="btn-danger" onclick="resetearFuncionCompletaSegura()">Resetear Lista y Vaciar Asistentes</button>
+    </div>
+  </div>
+
 </div>
 
-<!-- MODAL PREGUNTA MOCHILA -->
+<!-- MODAL REGISTRO DE MOCHILA -->
 <div id="modal-mochila" class="modal-backdrop">
   <div class="modal">
     <h3 style="margin-top:0;">Registro de Ingreso</h3>
@@ -371,11 +406,11 @@
 </div>
 
 <script>
-  // 1. Configuración de tu proyecto Firebase
+  // 1. Configuración de Firebase
   const firebaseConfig = {
     apiKey: "AIzaSyBtqEM2ydv0pGoG7_apXmEJQACrNZZsM9Y",
     authDomain: "cinepromo26-eet21.firebaseapp.com",
-    databaseURL: "https://cinepromo26-eet21-default-rtdb.firebaseio.com", // Se agrega URL requerida para la base de datos
+    databaseURL: "https://cinepromo26-eet21-default-rtdb.firebaseio.com",
     projectId: "cinepromo26-eet21",
     storageBucket: "cinepromo26-eet21.firebasestorage.app",
     messagingSenderId: "753645066811",
@@ -392,15 +427,21 @@
   let asistenteSeleccionado = null;
   let filtroActual = 'todos';
 
-  // 3. Escuchar los datos desde Firebase en TIEMPO REAL
+  // Normalizar datos importados o almacenados como Objeto/Array
+  function normalizarVentas(rawVentas) {
+    if (!rawVentas) return [];
+    let list = Array.isArray(rawVentas) ? rawVentas : Object.values(rawVentas);
+    return list.filter(v => v !== null && v !== undefined);
+  }
+
+  // 3. Escuchar Firebase en TIEMPO REAL
   db.ref('ventas_cine').on('value', (snapshot) => {
     const data = snapshot.val();
-    ventas = data ? data.ventas || [] : [];
-    contadorId = data ? data.contadorId || 1 : 1;
+    ventas = data ? normalizarVentas(data.ventas) : [];
+    contadorId = data ? (data.contadorId || 1) : 1;
     
     actualizarContadorAforo();
 
-    // Refresca automáticamente la vista que el usuario tenga activa
     const activeScreen = document.querySelector('.screen.active');
     if (activeScreen) {
       const screenId = activeScreen.id;
@@ -411,20 +452,20 @@
     }
   });
 
-  // Función para guardar los cambios centralizados en Firebase
   function sincronizarFirebase() {
     db.ref('ventas_cine').set({
       ventas: ventas,
       contadorId: contadorId
+    }).catch(err => {
+      console.error("Error al sincronizar en Firebase:", err);
+      alert("Error al guardar en la nube: " + err.message);
     });
   }
 
   function nav(screenId) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     const targetScreen = document.getElementById(screenId);
-    if (targetScreen) {
-      targetScreen.classList.add('active');
-    }
+    if (targetScreen) targetScreen.classList.add('active');
     
     actualizarContadorAforo();
 
@@ -472,9 +513,7 @@
     grid.className = 'asistentes-grid';
 
     for (let i = 1; i <= cant; i++) {
-      grid.innerHTML += `
-        <input type="text" class="input-asistente" placeholder="Asistente ${i}" required>
-      `;
+      grid.innerHTML += `<input type="text" class="input-asistente" placeholder="Asistente ${i}" required>`;
     }
     contenedor.appendChild(grid);
   }
@@ -504,8 +543,6 @@
     };
 
     ventas.push(nuevaVenta);
-    
-    // Guardar en la nube (Firebase)
     sincronizarFirebase();
 
     document.getElementById('form-venta').reset();
@@ -513,6 +550,78 @@
     
     alert('Venta registrada con éxito.');
     nav('screen-visualizar');
+  }
+
+  /* PESTAÑA: AGREGAR CURSO DE 6TO */
+  function agregarCampoAlumno6to() {
+    const contenedor = document.getElementById('contenedor-asistentes-6to');
+    const row = document.createElement('div');
+    row.className = 'asistente-input-row';
+    row.innerHTML = `
+      <input type="text" class="input-6to-alumno" placeholder="Nombre completo del alumno" required style="width: 100%;">
+      <button type="button" class="btn-danger" onclick="this.parentElement.remove()">X</button>
+    `;
+    contenedor.appendChild(row);
+  }
+
+  function guardarCurso6to(e) {
+    e.preventDefault();
+    const cursoNombre = document.getElementById('curso-division').value.trim();
+    const inputsAlumnos = document.querySelectorAll('.input-6to-alumno');
+    
+    const listaAsistentes = Array.from(inputsAlumnos)
+      .map(inp => inp.value.trim())
+      .filter(val => val !== '')
+      .map(nombre => ({
+        nombre: nombre,
+        ingresado: false,
+        dejaMochila: 'No',
+        numMochila: '-'
+      }));
+
+    if (listaAsistentes.length === 0) {
+      alert('Por favor agrega al menos a un alumno.');
+      return;
+    }
+
+    const nuevaVentaCurso = {
+      id: contadorId++,
+      optionVal: '6',
+      comprador: `Curso: ${cursoNombre}`,
+      promoText: `Curso 6to (${cursoNombre})`,
+      monto: 0,
+      metodoPago: 'Efectivo',
+      asistentes: listaAsistentes
+    };
+
+    ventas.push(nuevaVentaCurso);
+    sincronizarFirebase();
+
+    document.getElementById('form-curso6to').reset();
+    document.getElementById('contenedor-asistentes-6to').innerHTML = `
+      <div class="asistente-input-row">
+        <input type="text" class="input-6to-alumno" placeholder="Nombre completo del alumno" required style="width: 100%;">
+      </div>`;
+
+    alert(`Se registraron ${listaAsistentes.length} alumnos del curso ${cursoNombre} correctamente.`);
+    nav('screen-control-ingreso');
+  }
+
+  /* RESETEO SEGURO CON PALABRA CLAVE DE CONFIRMACIÓN */
+  function resetearFuncionCompletaSegura() {
+    const confirmacion = confirm("⚠️ ¿ATENCIÓN: Querés borrar los asistentes y vaciar la función completa?");
+    if (confirmacion) {
+      const clave = prompt("Para confirmar la eliminación total, escribí la palabra: ELIMINAR");
+      if (clave === "ELIMINAR") {
+        ventas = [];
+        contadorId = 1;
+        sincronizarFirebase();
+        alert("La función ha sido reseteada por completo y sin asistentes.");
+        nav('screen-main');
+      } else {
+        alert("Palabra clave incorrecta. Cancelando operación.");
+      }
+    }
   }
 
   function renderVisualizar() {
@@ -676,7 +785,8 @@
       '2': { promo: 'Opción 2 (2 entradas)', ventas: 0, personas: 0, recaudado: 0 },
       '3': { promo: 'Opción 3 (3 entradas)', ventas: 0, personas: 0, recaudado: 0 },
       '4': { promo: 'Opción 4 (5 entradas)', ventas: 0, personas: 0, recaudado: 0 },
-      '5': { promo: 'Opción 5 (Promo Especial)', ventas: 0, personas: 0, recaudado: 0 }
+      '5': { promo: 'Opción 5 (Promo Especial)', ventas: 0, personas: 0, recaudado: 0 },
+      '6': { promo: 'Cursos de 6to / Especiales', ventas: 0, personas: 0, recaudado: 0 }
     };
 
     ventas.forEach(v => {
@@ -721,7 +831,7 @@
     }
 
     let csvRows = [];
-    csvRows.push(["ID Entrada", "Comprador", "Asistente", "Estado", "Mochila", "Num Mochila", "Promo", "Monto", "Metodo Pago"]);
+    csvRows.push(["ID Entrada", "Comprador / Curso", "Asistente", "Estado", "Mochila", "Num Mochila", "Promo", "Monto", "Metodo Pago"]);
 
     ventas.forEach(v => {
       if (v.asistentes && Array.isArray(v.asistentes)) {
